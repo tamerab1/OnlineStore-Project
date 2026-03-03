@@ -30,6 +30,7 @@ FinalProject/
 │   └── templates/    # HTML files (base.html, index.html, product_details.html)
 ├── venv/             # Virtual environment
 └── requirements.txt  # Project dependencies
+```
 
 ## Installation & Setup
 Prerequisites
