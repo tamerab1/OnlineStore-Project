@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4 text-primary"><i class="bi bi-people-fill"></i> User Management & Analytics</h2>
+
+    <div class="card shadow-sm border-0 mb-4 bg-white">
+        <div class="card-body">
+            <form action="/manage-users" method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label fw-bold">Search Username</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="bi bi-search"></i></span>
+                        <input type="text" name="search" class="form-control" placeholder="Type name..." value="{{ search_query }}">
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label fw-bold">Min. Orders</label>
+                    <input type="number" name="min_orders" class="form-control" min="0" value="{{ min_orders }}">
+                </div>
+                <div class="col-md-5 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-grow-1">
+                        <i class="bi bi-filter"></i> Apply Filters
+                    </button>
+                    <a href="/manage-users" class="btn btn-outline-secondary">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-3">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-dark text-white fw-bold"><i class="bi bi-person-plus"></i> Create User   </div>
+                <div class="card-body"> 
+                    <form action="/manage-users/add" method="post">
+                        <div class="mb-3">
+                            <input type="text" name="username" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="mb-3">
+                            <input type="email" name="email" class="form-control" placeholder="Email" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Add User</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>ID</th>
+                                <th>User Info</th>
+                                <th class="text-center">Activity Status</th>
+                                <th class="text-center">Order Count</th>
+                                <th class="text-end px-4">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for user, order_count in users_data %}
+                            <tr>
+                                <td>{{ user.id }}</td>
+                                <td>
+                                    <div class="fw-bold">{{ user.username }}</div>
+                                    <small class="text-muted">{{ user.email }}</small>
+                                </td>
+                                <td class="text-center">
+                                    {% if order_count > 0 %}
+                                        <span class="badge bg-success-subtle text-success border border-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <div class="h5 m-0 fw-bold text-primary">{{ order_count }}</div>
+                                </td>
+                                <td class="text-end px-4">
+                                    <form action="/manage-users/delete/{{ user.id }}" method="post">
+                                        <button class="btn btn-outline-danger btn-sm" onclick="return confirm('Delete this user?')">
+                                            <i class="bi bi-trash3"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-muted">
+                                    <i class="bi bi-exclamation-circle h1 d-block"></i>
+                                    No users found matching your criteria.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

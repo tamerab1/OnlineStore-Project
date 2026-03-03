@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .product-card {
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        cursor: pointer;
+    }
+    
+    .product-card:hover {
+        transform: scale(1.01); /* הכרטיס גדל ב-5% */
+        box-shadow: 0 20px 40px rgba(13, 110, 253, 0.3) !important; /* הילה כחולה יפה */
+        border: 1px solid rgba(13, 110, 253, 0.5) !important; /* מסגרת כחולה עדינה */
+        z-index: 10;
+    }
+</style>
+<div class="row">
+    <div class="col-12">
+        <h2 class="mb-4">Product Catalog</h2>
+        
+        <div class="card mb-4 border-0 shadow-sm">
+            <div class="card-body">
+                <form action="/products-catalog" method="get" class="row g-3 align-items-end">
+                    
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Minimum Price</label>
+                        <div class="input-group">
+                            <span class="input-group-text">$</span>
+                            <input type="number" step="0.01" name="min_price" class="form-control" value="{{ min_price }}">
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label fw-bold">Search</label>
+                        <input type="text" name="search_term" class="form-control" value="{{ search_term or '' }}">
+                    </div>
+
+                    <div class="col-md-2">
+                        <label class="form-label fw-bold">Sort By</label>
+                        <select name="sort_order" class="form-select">
+                            <option value="">Default</option>
+                            <option value="asc" {% if sort_order == 'asc' %}selected{% endif %}>Low to High</option>
+                            <option value="desc" {% if sort_order == 'desc' %}selected{% endif %}>High to Low</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Apply</button>
+                    </div>
+                    <div class="col-md-2">
+                        <a href="/products-catalog" class="btn btn-outline-secondary w-100">Clear</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-3 g-4">
+    {% for p in products %}
+    <div class="col">
+        <div class="card h-100 shadow-sm border-0 product-card">
+            <div class="card-body">
+                <h5 class="card-title fw-bold">{{ p.name }}</h5>
+                <p class="card-text text-muted">{{ p.description }}</p>
+            </div>
+            <div class="card-footer bg-transparent border-0 d-flex justify-content-between align-items-center">
+                <span class="fs-5 fw-bold text-success">${{ "{:.2f}".format(p.price) }}</span>
+                <a href="/product/{{ p.id }}" class="btn btn-outline-primary btn-sm">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <h4 class="text-muted">No products found.</h4>
+    </div>
+    {% endfor %}
+</div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

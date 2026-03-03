@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row">
+    <div class="col-md-3">
+        <div class="list-group shadow-sm mb-4">
+            <div class="list-group-item bg-primary text-white fw-bold">Select Business Question</div>
+            <a href="/business-queries?q_id=1" class="list-group-item list-group-item-action {% if q_id==1 %}active{% endif %}">1. User Shipping (1:1)</a>
+            <a href="/business-queries?q_id=2" class="list-group-item list-group-item-action {% if q_id==2 %}active{% endif %}">2. Items in Order (N:M)</a>
+            <a href="/business-queries?q_id=3" class="list-group-item list-group-item-action {% if q_id==3 %}active{% endif %}">3. Order Counts (Group By)</a>
+            <a href="/business-queries?q_id=4" class="list-group-item list-group-item-action {% if q_id==4 %}active{% endif %}">4. Order Revenue (Sum)</a>
+            <a href="/business-queries?q_id=5" class="list-group-item list-group-item-action {% if q_id==5 %}active{% endif %}">5. Price Filtering</a>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        {% if not q_id %}
+            <div class="card border-0 shadow-sm text-center py-5">
+                <div class="card-body">
+                    <i class="bi bi-search-heart text-muted display-1"></i>
+                    <h3 class="mt-3">Ready for Data Analysis?</h3>
+                    <p class="text-muted">Choose a query from the left to see the database in action.</p>
+                </div>
+            </div>
+        {% else %}
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white border-bottom-0 pt-4">
+                    <h4 class="text-primary fw-bold">{{ query_title }}</h4>
+                    <p class="text-muted">{{ description }}</p>
+                </div>
+                <div class="card-body">
+                    
+                    {% if q_id == 2 or q_id == 4 %}
+                    <form class="row g-3 mb-4 bg-light p-3 rounded" action="/business-queries" method="get">
+                        <input type="hidden" name="q_id" value="{{ q_id }}">
+                        <div class="col-auto">
+                            <input type="number" name="order_id" class="form-control" placeholder="Enter Order ID" value="{{ order_id or '' }}" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Fetch Data</button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    {% if q_id == 5 %}
+                    <form class="row g-3 mb-4 bg-light p-3 rounded" action="/business-queries" method="get">
+                        <input type="hidden" name="q_id" value="5">
+                        <div class="col-auto">
+                            <input type="number" step="0.01" name="min_price" class="form-control" placeholder="Min Price" value="{{ min_price or '' }}" required>
+                        </div>
+                        <div class="col-auto">
+                            <button type="submit" class="btn btn-primary">Filter</button>
+                        </div>
+                    </form>
+                    {% endif %}
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                {% if q_id == 1 %}
+                                    <tr><th>Username</th><th>Shipping Address</th></tr>
+                                {% elif q_id == 2 %}
+                                    <tr>
+                                        <th>Product Name</th>
+                                        <th>Price per Unit</th>
+                                        <th>Quantity</th>
+                                        <th>Subtotal</th>
+                                    </tr>
+                                {% elif q_id == 3 %}
+                                    <tr><th>Username</th><th>Total Orders</th></tr>
+                                {% elif q_id == 4 %}
+                                    <tr><th>Order ID</th><th>Customer</th><th>Total Revenue</th></tr>
+                                {% elif q_id == 5 %}
+                                    <tr><th>Product Name</th><th>Price</th></tr>
+                                {% endif %}
+                            </thead>
+                            <tbody>
+                                {% if q_id == 1 %}
+                                    {% for user, details in results %}
+                                    <tr>
+                                        <td>{{ user.username }}</td>
+                                        <td>{{ details.shipping_address }}</td>
+                                    </tr>
+                                    {% endfor %}
+
+                                {% elif q_id == 2 %}
+                                    {% if results %}
+                                        {% for row in results %}
+                                        <tr>
+                                            <td>{{ row[1].name }}</td>
+                                            <td>${{ "{:.2f}".format(row[1].price) }}</td>
+                                            <td>{{ row[2] }}</td>
+                                            <td class="fw-bold">${{ "{:.2f}".format(row[1].price * row[2]) }}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr><td colspan="4" class="text-center text-muted">No items found for this order.</td></tr>
+                                    {% endif %}
+
+                                {% elif q_id == 3 %}
+                                    {% for name, count in results %}
+                                    <tr>
+                                        <td>{{ name }}</td>
+                                        <td><span class="badge bg-success">{{ count }} Orders</span></td>
+                                    </tr>
+                                    {% endfor %}
+
+                                {% elif q_id == 4 %}
+                                    {% if results %}
+                                    <tr>
+                                        <td>#{{ results.id }}</td>
+                                        <td>{{ results.username }}</td>
+                                        <td class="fw-bold text-success">${{ "{:.2f}".format(results.total_revenue) }}</td>
+                                    </tr>
+                                    {% else %}
+                                        <tr><td colspan="3" class="text-center text-muted">Enter a valid Order ID to calculate.</td></tr>
+                                    {% endif %}
+
+                                {% elif q_id == 5 %}
+                                    {% for p in results %}
+                                    <tr>
+                                        <td>{{ p.name }}</td>
+                                        <td class="text-primary">${{ "{:.2f}".format(p.price) }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
